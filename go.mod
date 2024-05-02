@@ -4,6 +4,8 @@ go 1.20
 
 require github.com/gin-gonic/gin v1.9.1
 
+require github.com/google/uuid v1.6.0 // indirect
+
 require (
 	github.com/bytedance/sonic v1.11.3 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20230717121745-296ad89f973d // indirect
