@@ -2,8 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
-	"net/http"
 
 	"golang.org/x/crypto/bcrypt"
 
@@ -13,131 +11,99 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// User represents a user in the database
-type User struct {
-	ID       string
-	Username string
-	Password string
-	email    string
-}
-
-const saltSize = 16
+var logingo = "login.go"
 
 func CreateTables(db *sql.DB) error {
 	// Create users table
-	_, err := db.Exec(`CREATE TABLE users (
+	_, err := Db.Exec(`CREATE TABLE IF NOT EXISTS users (
 		ID TEXT PRIMARY KEY,
-		username TEXT,
-		password TEXT,
-		email TEXT
+		username TEXT NOT NULL UNIQUE,
+		password TEXT NOT NULL,
+		email TEXT NOT NULL UNIQUE
 	)`)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func registerHandler(c *gin.Context) {
-	w := c.Writer
-	r := c.Request
+func RegisterHandler(c *gin.Context) {
+	if c.Request.Method == "POST" {
+		email := c.PostForm("email")
+		username := c.PostForm("username")
+		password := c.PostForm("password")
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	email := r.FormValue("email")
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-
-	// Check if user with the given username or eemail already exists
-	var count int
-	err := db.QueryRow("SELECT COUNT(*) FROM users WHERE username = ? OR email = ?", username, email).Scan(&count)
-	if err != nil {
-		http.Error(w, "Error checking user existence", http.StatusInternalServerError)
-		log.Println(err)
-		return
-	}
-	if count > 0 {
-		http.Error(w, "Username or email already exists", http.StatusBadRequest)
-		return
-	}
-
-	// Generate UUID for the user
-	userID := uuid.New().String()
-
-	// Hash password
-	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
-	hashedPassword := string(bytes)
-
-	// Insert user into the database
-	_, err = db.Exec("INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?)", userID, email, username, hashedPassword)
-	if err != nil {
-		http.Error(w, "Error registering user", http.StatusInternalServerError)
-		log.Println(err)
-		return
-	}
-
-	// Redirect to login page after successful registration
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
-}
-
-func loginHandler(c *gin.Context) {
-	w := c.Writer
-	r := c.Request
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-
-	// Query the database for the user
-	row := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?", username)
-	user := User{}
-	var hashedPassword string
-	err := row.Scan(&user.ID, &user.Username, &hashedPassword)
-	if err != nil {
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
-		log.Println(err)
-		return
-	}
-
-	// Compare the hashed password with the provided password
-	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	if err != nil {
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
-		log.Println(err)
-		return
-	}
-
-	// Successful login
-	// Set a cookie with the user's ID
-	cookie := http.Cookie{
-		Name:     "userID",
-		Value:    user.ID,
-		HttpOnly: true,
-		Path:     "/",
-	}
-	http.SetCookie(w, &cookie)
-
-	// Redirect to login page after successful login
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
-}
-
-func checkAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Check if the userID cookie exists
-		cookie, err := r.Cookie("userID")
-		if err != nil || cookie.Value == "" {
-			// If the cookie doesn't exist, redirect the user to the login page
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		// Check if user with the given username or eemail already exists
+		var us User
+		err := Db.QueryRow("SELECT id, email, username FROM users WHERE email = ? OR username = ?", email, username).Scan(&us.ID, &us.Email, &us.Username)
+		if err != nil && err != sql.ErrNoRows {
+			NonFatal(err, logingo, "Querying resgiter error")
 			return
 		}
 
-		// If the cookie exists, call the next handler
-		next.ServeHTTP(w, r)
-	})
+		if us.ID != 0 {
+			ErrorMessage = "Erreur : l'utilisateur existe déjà"
+			return
+		}
+
+		// Generate UUID for the user
+		userID := uuid.New().String()
+
+		// Hash password
+		bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 4)
+		hashedPassword := string(bytes)
+
+		// Insert user into the database
+		_, err = Db.Exec("INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?)", userID, email, username, hashedPassword)
+		if err != nil {
+			NonFatal(err, logingo, "Inserting new user in db.sqlite")
+			return
+		}
+		c.Redirect(301, "/login")
+	}
+
+	data := gin.H{
+		"Title": "Créer un compte",
+	}
+
+	ShowPage(c, "/register", data)
+}
+
+func LoginHandler(c *gin.Context) {
+	if c.Request.Method == "POST" {
+		email := c.PostForm("email")
+		password := c.PostForm("password")
+
+		// Retrieve user details from the database based on the provided email
+		var us User
+		err := Db.QueryRow("SELECT id, email, username, password FROM users WHERE email = ?", email).Scan(&us.ID, &us.Email, &us.Username, &us.Password)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				ErrorMessage = "Erreur : utilisateur ou mot de passe incorrect"
+				return
+			}
+			NonFatal(err, logingo, "Querying login error")
+			return
+		}
+
+		// Compare hashed password with the one provided
+		err = bcrypt.CompareHashAndPassword([]byte(us.Password), []byte(password))
+		if err != nil {
+			ErrorMessage = "Erreur : utilisateur ou mot de passe incorrect"
+			return
+		}
+
+		// Create session or token here, e.g., using JWT or setting a session cookie
+		// Example: SetSession(c, us.ID) or JWT token generation
+
+		SetSessionCookie(c, us.Username)
+		c.Redirect(301, "/")
+	}
+
+	data := gin.H{
+		"Title": "Connexion",
+	}
+
+	ShowPage(c, "/login", data)
 }

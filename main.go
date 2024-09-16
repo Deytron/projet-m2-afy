@@ -1,81 +1,43 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-
-	"github.com/foolin/goview/supports/ginview"
-	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var db *sql.DB
+// ENABLE DEBUG HERE by setting it to true
+var Debug = false
+
+// Variables
+var SuccessMessage string
+var ErrorMessage string
+
+var port = ":8081"
+var maingo = "main.go"
 
 func main() {
-	r := gin.Default()
+	// Load dotenv
+	err := godotenv.Load()
+	Fatal(err, maingo, "Loading .env")
 
-	// Check if the database file exists
-	if _, err := os.Stat("./db.sqlite"); os.IsNotExist(err) {
-		fmt.Println("Database does not exist. Creating tables...")
-		var err error
-		db, err = sql.Open("sqlite3", "db.sqlite")
-		if err != nil {
-			log.Fatal("Error connecting to database:", err)
-		}
-		defer db.Close()
+	CheckDb()
+	// Initialisation of router
+	InitConfig()
 
-		err = CreateTables(db)
-		if err != nil {
-			log.Fatal("Error creating tables:", err)
-		}
-		fmt.Println("Database and tables created successfully.")
-	} else {
-		fmt.Println("Database already exists.")
-	}
+	// Now you can use config.GetConfig().Router and config.GetConfig().Templates
+	r := GetConfig().Router
+	// r.Use(CORSMiddleware())
+	SetRoutes(r)
+	r.Use(CORSMiddleware())
+	// Set limit for file upload
+	r.MaxMultipartMemory = 8 << 20 // 8 MiB
 
-	// Initialize database connection
-	var err error
-	db, err = sql.Open("sqlite3", "db.sqlite")
-	if err != nil {
-		log.Fatal("Error connecting to database:", err)
-	}
-	defer db.Close()
+	// Static files
+	r.Static("/assets", "assets/")
 
-	// Check if the connection to the database is successful
-	err = db.Ping()
-	if err != nil {
-		log.Fatal("Error pinging database:", err)
-	}
+	// Don't trus all proxies
+	perr := r.SetTrustedProxies(nil)
+	NonFatal(perr, maingo, "Setting trusted proxies")
 
-	r.StaticFile("/logo-light.png", "./assets/logo-light.png")
-	r.StaticFile("/style.css", "./style/style.css")
-
-	r.HTMLRender = ginview.Default()
-
-	r.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index", gin.H{
-			"title": "AFY",
-		})
-	})
-
-	r.GET("/signup", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "signup", gin.H{
-			"title": "Inscription",
-		})
-	})
-
-	r.POST("/login", loginHandler)
-
-	r.GET("/login", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "login", gin.H{
-			"title": "Connexion",
-		})
-	})
-
-	r.POST("/signup", registerHandler)
-
-	r.Run(":8081")
+	r.Run(port)
 }
