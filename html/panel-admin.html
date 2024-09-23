@@ -1,0 +1,207 @@
+{{template "master" .}}
+
+<body>
+  <div class="container">
+    <h1 class="title is-2 has-text-centered mt-2">État des services AFY</h1>
+    <div class="content">
+      <table>
+        <thead>
+          <tr>
+            <th>Hébergement machines</th>
+            <th>Hébergement web</th>
+            <th>DNS</th>
+            <th>Cloud storage</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              Datacenter-1 :
+              <strong class="has-text-primary">Opérationnel</strong>
+            </td>
+            <td>
+              Datacenter-1 :
+              <strong class="has-text-primary">Opérationnel</strong>
+            </td>
+            <td>
+              NS-1 : <strong class="has-text-primary">Opérationnel</strong>
+            </td>
+            <td>
+              Datacenter-1 :
+              <strong class="has-text-info">Disponible prochainement</strong>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              Datacenter-2 :
+              <strong class="has-text-warning"
+                >Ralentissements constatés</strong
+              >
+            </td>
+            <td>
+              Datacenter-2 :
+              <strong class="has-text-warning"
+                >Ralentissements constatés</strong
+              >
+            </td>
+            <td>
+              NS-2 : <strong class="has-text-primary">Opérationnel</strong>
+            </td>
+            <td>
+              Datacenter-2 :
+              <strong class="has-text-info">En cours de test</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h1 class="title is-2 has-text-centered mt-3 mb-3">Vos services</h1>
+    <div class="columns is-multiline">
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/vms">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/vm.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Machines virtuelles</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Gérez vos machines virtuelles
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/sites">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/sites.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Sites</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Modifiez vos sites hébergés
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/names">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/names.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Noms de domaines</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Achetez et gérez les noms de domaine
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/support">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/support.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Support</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Contactez le support AFY
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/paiements">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/cards.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Facturation</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Gérez vos méthodes de paiement
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/budget">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/budget.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Budgets</h4>
+                  <p class="subtitle is-size-7 mt-1">Maîtrisez vos dépenses</p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+      <div class="column is-3-fullhd is-4-desktop is-full-touch">
+        <div class="box">
+          <a href="/policy">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/policy.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">Confidentialité</h4>
+                  <p class="subtitle is-size-7 mt-1">
+                    Clauses de confidentialité AFY
+                  </p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>

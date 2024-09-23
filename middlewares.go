@@ -65,6 +65,11 @@ func ShowPage(c *gin.Context, page string, data gin.H) {
 		data["ErrorMessage"] = ErrorMessage
 	}
 
+	_, cerr := c.Cookie("username") 
+	if cerr == nil {
+		data["Logged"] = true
+	}
+
 	err := t.ExecuteTemplate(c.Writer, page+".html", data)
 	if err != nil {
 		fmt.Println(500, err.Error())

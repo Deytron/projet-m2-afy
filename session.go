@@ -12,12 +12,12 @@ import (
 func SetSessionCookie(c *gin.Context, username string) {
 	token := uuid.NewString()
 	// WARNING If changing URL for site, also change HOST in .env
-	c.SetCookie("session_token", token, 14400, "/", os.Getenv("HOST"), true, true)
-	c.SetCookie("username", username, 14400, "/", os.Getenv("HOST"), true, true)
+	c.SetCookie("session_token", token, 14400, "/", os.Getenv("HOST"), false, false)
+	c.SetCookie("username", username, 14400, "/", os.Getenv("HOST"), false, false)
 }
 
 func LogoutHandler(c *gin.Context) {
-	c.SetCookie("session_token", "XXX", -1000, "/", os.Getenv("HOST"), true, true)
-	c.SetCookie("username", "XXX", -1000, "/", os.Getenv("HOST"), true, true)
+	c.SetCookie("session_token", "XXX", -1000, "/", os.Getenv("HOST"), false, false)
+	c.SetCookie("username", "XXX", -1000, "/", os.Getenv("HOST"), false, false)
 	c.Redirect(http.StatusTemporaryRedirect, "/login")
 }

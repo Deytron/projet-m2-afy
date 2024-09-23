@@ -53,21 +53,47 @@
 
     <div id="navMenu" class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item"> Hébergement web </a>
+        <a class="navbar-item">Hébergement web</a>
 
-        <a class="navbar-item"> VPS </a>
+        <a class="navbar-item">Machines virtuelles</a>
+        <a class="navbar-item">Noms de domaines</a>
+
+        {{ if .Logged}}
+        <a class="navbar-item" href="/panel-admin">Panel d'administration</a>
+        {{end}}
       </div>
 
       <div class="navbar-end">
         <div class="navbar-item">
           <div class="buttons">
+            {{ if .Logged}}
+            <a class="button is-danger" href="/logout">
+              <strong>Déconnexion</strong>
+            </a>
+            {{else}}
             <a class="button is-primary" href="/register">
               <strong>Inscription</strong>
             </a>
             <a class="button is-light" href="/login"> Connexion </a>
+            {{end}}
           </div>
         </div>
       </div>
     </div>
   </nav>
-{{end}}
+  {{if .ErrorMessage}}
+  <article class="message is-danger mt-3 mb-3">
+    <div class="message-header">
+      <p>Erreur</p>
+    </div>
+    <div class="message-body">{{.ErrorMessage}}</div>
+  </article>
+  {{end}} {{if .SuccessMessage}}
+  <article class="message is-success mt-3 mb-3">
+    <div class="message-header">
+      <p>Succès !</p>
+    </div>
+    <div class="message-body">{{.SuccessMessage}}</div>
+  </article>
+  {{end}} {{end}}
+</html>

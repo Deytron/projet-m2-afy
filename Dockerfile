@@ -8,7 +8,6 @@ RUN go mod download
 
 COPY assets assets
 COPY html html
-COPY db.sqlite ./
 COPY  *.go .env ./
 
 EXPOSE 8081

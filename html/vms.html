@@ -1,0 +1,41 @@
+{{template "master" .}}
+
+<body>
+  <div class="container mt-2">
+    <h1 class="title is-2 has-text-centered">Vos machines virtuelles</h1>
+    {{ if not .Vms}}
+    <h2 class="subtitle is-2 has-text-centered">
+      Vous ne disposez d'aucune machine
+    </h2>
+    {{else}} {{range $vm := .Vms}}
+    <div class="grid">
+      <div class="cell">
+        <div class="box">
+          <a href="https://{{$vm.IPAddress}}:10000/">
+            <article class="media">
+              <div class="media-left">
+                <figure class="image is-48x48">
+                  <img src="/assets/vm.png" alt="Image" />
+                </figure>
+              </div>
+              <div class="media-content">
+                <div class="content">
+                  <h4 class="title is-5">{{$vm.Vmname}}</h4>
+                  <p class="subtitle is-size-7 mt-1">{{$vm.Description}}</p>
+                </div>
+              </div>
+            </article>
+          </a>
+        </div>
+      </div>
+    </div>
+    {{end}} {{end}}
+    <div class="columns is-vcentered is-centered mt-2">
+      <div class="column is-vcentered is-centered">
+        <a class="button is-success has-text-centered" href="/create-vm"
+          >Créer une VM</a
+        >
+      </div>
+    </div>
+  </div>
+</body>

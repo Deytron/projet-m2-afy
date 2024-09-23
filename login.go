@@ -13,7 +13,7 @@ import (
 
 var logingo = "login.go"
 
-func CreateTables(db *sql.DB) error {
+func CreateTables() error {
 	// Create users table
 	_, err := Db.Exec(`CREATE TABLE IF NOT EXISTS users (
 		ID TEXT PRIMARY KEY,
@@ -21,7 +21,44 @@ func CreateTables(db *sql.DB) error {
 		password TEXT NOT NULL,
 		email TEXT NOT NULL UNIQUE
 	)`)
+	_, berr := Db.Exec(`CREATE TABLE IF NOT EXISTS vms (
+		ID TEXT PRIMARY KEY,
+		vmname TEXT,
+		ipaddress TEXT NULL,
+		description TEXT NULL,
+		sku TEXT,
+		datacenter TEXT,
+		username TEXT
+	)`)
+	_, cerr := Db.Exec(`CREATE TABLE IF NOT EXISTS site (
+		ID TEXT PRIMARY KEY,
+		sitename TEXT NOT NULL UNIQUE,
+		userId TEXT UNIQUE,
+
+		CONSTRAINT fk_userId
+      		FOREIGN KEY(userId) 
+        		REFERENCES users(ID)
+	)`)
+	_, derr := Db.Exec(`CREATE TABLE IF NOT EXISTS dns (
+		ID TEXT PRIMARY KEY,
+		domainName TEXT,
+		extension TEXT,
+		userId TEXT UNIQUE,
+
+		CONSTRAINT fk_userId
+      		FOREIGN KEY(userId) 
+        		REFERENCES users(ID)
+	)`)
 	if err != nil {
+		return err
+	}
+	if berr != nil {
+		return err
+	}
+	if cerr != nil {
+		return err
+	}
+	if derr != nil {
 		return err
 	}
 
@@ -38,13 +75,11 @@ func RegisterHandler(c *gin.Context) {
 		var us User
 		err := Db.QueryRow("SELECT id, email, username FROM users WHERE email = ? OR username = ?", email, username).Scan(&us.ID, &us.Email, &us.Username)
 		if err != nil && err != sql.ErrNoRows {
-			NonFatal(err, logingo, "Querying resgiter error")
-			return
+			NonFatal(err, logingo, "Querying register error")
 		}
 
-		if us.ID != 0 {
+		if us.ID != "" {
 			ErrorMessage = "Erreur : l'utilisateur existe déjà"
-			return
 		}
 
 		// Generate UUID for the user
@@ -58,7 +93,6 @@ func RegisterHandler(c *gin.Context) {
 		_, err = Db.Exec("INSERT INTO users (id, email, username, password) VALUES (?, ?, ?, ?)", userID, email, username, hashedPassword)
 		if err != nil {
 			NonFatal(err, logingo, "Inserting new user in db.sqlite")
-			return
 		}
 		c.Redirect(301, "/login")
 	}
@@ -67,7 +101,7 @@ func RegisterHandler(c *gin.Context) {
 		"Title": "Créer un compte",
 	}
 
-	ShowPage(c, "/register", data)
+	ShowPage(c, "register", data)
 }
 
 func LoginHandler(c *gin.Context) {
@@ -81,21 +115,15 @@ func LoginHandler(c *gin.Context) {
 		if err != nil {
 			if err == sql.ErrNoRows {
 				ErrorMessage = "Erreur : utilisateur ou mot de passe incorrect"
-				return
 			}
 			NonFatal(err, logingo, "Querying login error")
-			return
 		}
 
 		// Compare hashed password with the one provided
 		err = bcrypt.CompareHashAndPassword([]byte(us.Password), []byte(password))
 		if err != nil {
 			ErrorMessage = "Erreur : utilisateur ou mot de passe incorrect"
-			return
 		}
-
-		// Create session or token here, e.g., using JWT or setting a session cookie
-		// Example: SetSession(c, us.ID) or JWT token generation
 
 		SetSessionCookie(c, us.Username)
 		c.Redirect(301, "/")
@@ -105,5 +133,5 @@ func LoginHandler(c *gin.Context) {
 		"Title": "Connexion",
 	}
 
-	ShowPage(c, "/login", data)
+	ShowPage(c, "login", data)
 }

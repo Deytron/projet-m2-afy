@@ -14,8 +14,16 @@ func SetRoutes(r *gin.Engine) {
 	r.GET("/register", RegisterHandler)
 	r.GET("/logout", LogoutHandler)
 	r.GET("/unauthorized", UnauthorizedHandler)
+	r.GET("/panel-admin", PanelAdminHandler)
+	r.GET("/vms", VmsHandler)
+	r.GET("/create-vm", CreateVmsHandler)
+	r.GET("/policy", PolicyHandler)
+	r.GET("/sites", SitesHandler)
+	r.GET("/names", NamesHandler)
+	r.GET("/support", SupportHandler)
 
 	// POST routes
 	r.POST("/login", LoginHandler)
 	r.POST("/register", RegisterHandler)
+	r.POST("/create-vm", CreateVmsHandler)
 }
